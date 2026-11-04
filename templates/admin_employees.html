@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block title %}Gestion des Employés{% endblock %}
+{% block content %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: url("{{ url_for('static', filename='background.jpeg') }}") no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    .admin-nav {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 70px;
+        width: 250px;
+        height: calc(100vh - 70px);
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px 0;
+    }
+
+    .sidebar a {
+        display: block;
+        padding: 15px 25px;
+        color: #555555;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar a:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #cd6300;
+    }
+
+    .main-content {
+        margin-left: 250px;
+        padding: 30px;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .search-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .search-bar input, .search-bar select {
+        padding: 12px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #cd6300 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-card h3 {
+        font-size: 14px;
+        margin-bottom: 10px;
+        opacity: 0.9;
+    }
+
+    .stat-card .count {
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    thead {
+        background: #f8f9fa;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    th {
+        font-weight: 600;
+        color: #333333;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 5px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: #cd6300;
+        color: white;
+    }
+
+    .btn-success {
+        background: #cd6300;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #f44336;
+        color: white;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #888888;
+    }
+</style>
+
+<div class="admin-nav">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="width: 40px; height: 40px; border-radius: 50%;">
+        <span style="font-size: 20px; font-weight: 700;">Gestion des Employés</span>
+    </div>
+    <div>
+        <span style="margin-right: 15px; font-weight: 600;">👤 {{ nom }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Déconnexion</a>
+    </div>
+</div>
+
+<div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+    <a href="{{ url_for('admin_menus') }}"> Menus</a>
+    <a href="{{ url_for('admin_repas') }}"> Repas</a>
+    <a href="{{ url_for('admin_commandes') }}"> Commandes</a>
+    <a href="{{ url_for('admin_eleves') }}"> Élèves</a>
+    <a href="{{ url_for('admin_stock') }}"> Stock</a>
+    <a href="{{ url_for('admin_paiements') }}"> Paiements</a>
+    <a href="{{ url_for('admin_employees') }}" style="background: rgba(102, 126, 234, 0.1); color: #cd6300;"> Employés</a>
+    
+</div>
+
+<div class="main-content">
+    <h1 style="color: white; margin-bottom: 25px;"> Gestion des Employés</h1>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Liste des Employés</h2>
+            <a href="{{ url_for('admin_employees_ajouter') }}" class="btn btn-success">➕ Ajouter un Employé</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder=" Rechercher par nom ou ID..." onkeyup="searchEmployees()">
+            <select id="postFilter" onchange="searchEmployees()">
+                <option value="Tous">Tous les postes</option>
+                <option value="Cuisinier">Cuisinier</option>
+                <option value="Serveur">Serveur</option>
+                <option value="Gestionnaire">Gestionnaire</option>
+                <option value="Caissier">Caissier</option>
+                <option value="Agent d'entretien">Agent d'entretien</option>
+                <option value="Responsable">Responsable</option>
+            </select>
+            <button onclick="resetSearch()" class="btn btn-secondary"> Réinitialiser</button>
+        </div>
+
+        <div id="statsContainer" class="stats-container"></div>
+
+        <div id="employeesTable">
+            {% if employees|length == 0 %}
+            <div class="no-results">
+                <p> Aucun employé enregistré</p>
+                <a href="{{ url_for('admin_employees_ajouter') }}" class="btn btn-primary">Ajouter le premier employé</a>
+            </div>
+            {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom Complet</th>
+                        <th>Poste</th>
+                        <th>Téléphone</th>
+                        <th>Email</th>
+                        <th>Date d'Embauche</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeesBody">
+                    {% for employee in employees %}
+                    <tr>
+                        <td><strong>{{ employee.id_employees }}</strong></td>
+                        <td>{{ employee.nom_complet }}</td>
+                        <td><span style="background: #e3f2fd; padding: 5px 10px; border-radius: 5px; font-size: 13px;">{{ employee.post }}</span></td>
+                        <td> {{ employee.numero_du_telephone_emplye }}</td>
+                        <td> {{ employee.emaile_emplye }}</td>
+                        <td>{{ employee.date_d_embauchement }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_employees_modifier', employee_id=employee.id_employees) }}" class="btn btn-primary"> Modifier</a>
+                            <a href="{{ url_for('admin_employees_supprimer', employee_id=employee.id_employees) }}" 
+                               class="btn btn-danger" 
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')"> Supprimer</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+let allEmployees = {{ employees|tojson }};
+
+function searchEmployees() {
+    const query = document.getElementById('searchInput').value;
+    const post = document.getElementById('postFilter').value;
+    
+    fetch(`/admin/employees/recherche?q=${encodeURIComponent(query)}&post=${encodeURIComponent(post)}`)
+        .then(response => response.json())
+        .then(data => {
+            displayEmployees(data.employees);
+        });
+}
+
+function displayEmployees(employees) {
+    const tbody = document.getElementById('employeesBody');
+    
+    if (employees.length === 0) {
+        document.getElementById('employeesTable').innerHTML = `
+            <div class="no-results">
+                <p> Aucun employé trouvé</p>
+            </div>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = employees.map(e => `
+        <tr>
+            <td><strong>${e.id_employees}</strong></td>
+            <td>${e.nom_complet}</td>
+            <td><span style="background: #e3f2fd; padding: 5px 10px; border-radius: 5px; font-size: 13px;">${e.post}</span></td>
+            <td> ${e.numero_du_telephone_emplye}</td>
+            <td> ${e.emaile_emplye}</td>
+            <td>${e.date_d_embauchement}</td>
+            <td>
+                <a href="/admin/employees/modifier/${e.id_employees}" class="btn btn-primary"> Modifier</a>
+                <a href="/admin/employees/supprimer/${e.id_employees}" 
+                   class="btn btn-danger" 
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')"> Supprimer</a>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function resetSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('postFilter').value = 'Tous';
+    displayEmployees(allEmployees);
+    loadStats();
+}
+
+function loadStats() {
+    fetch('/admin/employees/stats')
+        .then(response => response.json())
+        .then(data => {
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (data.posts.length > 0) {
+                statsContainer.innerHTML = data.posts.map(p => `
+                    <div class="stat-card">
+                        <h3>${p.nom}</h3>
+                        <div class="count">${p.count}</div>
+                    </div>
+                `).join('');
+            }
+        });
+}
+
+loadStats();
+</script>
+
+{% endblock %}

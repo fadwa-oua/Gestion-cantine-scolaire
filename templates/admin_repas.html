@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Gestion des Repas{% endblock %}
+{% block content %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: url("{{ url_for('static', filename='background.jpeg') }}") no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+    .admin-nav {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #333333; }
+    .logo img { width: 40px; height: 40px; border-radius: 50%; }
+    .sidebar { position: fixed; left: 0; top: 70px; width: 250px; height: calc(100vh - 70px); background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); padding: 20px 0; }
+    .sidebar a { display: block; padding: 15px 25px; color: #555555; text-decoration: none; transition: all 0.3s ease; border-left: 4px solid transparent; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(102, 126, 234, 0.1); color:#cd6300; border-left-color:#cd6300; }
+    .main-content { margin-left: 250px; padding: 30px; }
+    h1 { color: white; margin-bottom: 30px; font-size: 28px; }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .repas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .repas-card {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .repas-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .type-entree { background: linear-gradient(135deg, #4CAF50, #45a049); color: white; }
+    .type-plat { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; }
+    .type-accompagnement { background: linear-gradient(135deg, #2196F3, #1976D2); color: white; }
+    .type-dessert { background: linear-gradient(135deg, #E91E63, #C2185B); color: white; }
+
+    .repas-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333333;
+        margin-bottom: 10px;
+    }
+
+    .repas-description {
+        color: #666666;
+        font-size: 14px;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+
+    .repas-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .info-item {
+        font-size: 13px;
+        color: #666666;
+    }
+
+    .info-item strong {
+        color: #333333;
+    }
+
+    .repas-prix {
+        font-size: 24px;
+        font-weight: 700;
+        color: #db7a2a;
+        margin-bottom: 15px;
+    }
+
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        margin-right: 5px;
+    }
+
+    .btn-modifier {
+        background: #2196F3;
+        color: white;
+    }
+
+    .btn-modifier:hover {
+        background: #1976D2;
+    }
+
+    .btn-supprimer {
+        background: #f44336;
+        color: white;
+    }
+
+    .btn-supprimer:hover {
+        background: #d32f2f;
+    }
+
+    .btn-add {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        color:#cd6300;
+        border: 2px solid#cd6300;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add:hover {
+        background:#cd6300;
+        color: white;
+    }
+</style>
+
+<div class="admin-nav">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <span>Admin - Cantine Scolaire</span>
+    </div>
+    <div>
+        <span style="margin-right: 15px; font-weight: 600;">👤 {{ nom }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Déconnexion</a>
+    </div>
+</div>
+
+<div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+    <a href="{{ url_for('admin_menus') }}"> Menus</a>
+    <a href="{{ url_for('admin_repas') }}" class="active"> Repas</a>
+    <a href="{{ url_for('admin_commandes') }}"> Commandes</a>
+    <a href="{{ url_for('admin_eleves') }}"> Élèves</a>
+    <a href="{{ url_for('admin_stock') }}"> Stock</a>
+    <a href="{{ url_for('admin_paiements') }}"> Paiements</a>
+    <a href="{{ url_for('admin_employees') }}"> Employés</a>
+</div>
+
+<div class="main-content">
+    <div class="header-actions">
+        <h1> Gestion des Repas</h1>
+        <a href="{{ url_for('admin_repas_ajouter') }}" class="btn-add">
+            ➕ Ajouter un Repas
+        </a>
+    </div>
+
+    {% if repas|length == 0 %}
+    <div style="background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);; padding: 40px; border-radius: 15px; text-align: center; color: #666666;">
+        <p style="font-size: 18px;">Aucun repas créé</p>
+        <p style="margin-top: 10px;">Commencez par ajouter votre premier repas</p>
+    </div>
+    {% else %}
+    <div class="repas-grid">
+        {% for r in repas %}
+        <div class="repas-card">
+            <span class="type-badge 
+                {% if r.type == 'Entrée' %}type-entree
+                {% elif r.type == 'Plat Principal' %}type-plat
+                {% elif r.type == 'Accompagnement' %}type-accompagnement
+                {% elif r.type == 'Dessert' %}type-dessert
+                {% endif %}">
+                {{ r.type }}
+            </span>
+            
+            <div class="repas-name">{{ r.nom_du_repas }}</div>
+            <div class="repas-description">{{ r.description }}</div>
+            
+            <div class="repas-info">
+                <div class="info-item">
+                    <strong></strong> {{ r.calories }} kcal
+                </div>
+                <div class="info-item">
+                    <strong></strong> {{ r.glucides }}g glucides
+                </div>
+                <div class="info-item">
+                    <strong></strong> {{ r.lipides }}g lipides
+                </div>
+                <div class="info-item">
+                    <strong></strong> {{ r.proteines }}g protéines
+                </div>
+            </div>
+            
+            <div class="repas-prix">{{ "%.2f"|format(r.prix) }} DH</div>
+            
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('admin_repas_modifier', repas_id=r.id_repas) }}" 
+                   class="btn-action btn-modifier">
+                     Modifier
+                </a>
+                <a href="{{ url_for('admin_repas_supprimer', repas_id=r.id_repas) }}" 
+                   class="btn-action btn-supprimer"
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce repas ?')">
+                     Supprimer
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

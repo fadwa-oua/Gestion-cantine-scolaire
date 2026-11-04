@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}Récupérer mon Badge - Cantine Scolaire{% endblock %}
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .recuperation-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-image: url("{{ url_for('static', filename='inscription-bg.jpeg') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        padding: 40px 20px;
+        position: relative;
+    }
+
+    .recuperation-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 0;
+    }
+
+    .recuperation-box {
+        position: relative;
+        z-index: 1;
+        background: transparent;
+        border-radius: 30px;
+        padding: 50px 40px;
+        max-width: 600px;
+        width: 100%;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    h1 {
+        text-align: center;
+        color: #ffffff;
+        margin-bottom: 20px;
+        font-size: 36px;
+        font-weight: 700;
+        text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .info-message {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        color: #ffffff;
+        text-align: center;
+        font-size: 16px;
+        line-height: 1.6;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .info-message strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #ffd700;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 16px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.25);
+        color: #333;
+        font-family: inherit;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.35);
+    }
+
+    .form-group input::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 16px 40px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #db7a2a 0%, #c96a1a 100%);
+        color: white;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 5px 15px rgba(219, 122, 42, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #c96a1a 0%, #b85f10 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(219, 122, 42, 0.5);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: translateY(-2px);
+    }
+
+    .btn:active {
+        transform: translateY(-1px);
+    }
+
+    @media screen and (max-width: 768px) {
+        .recuperation-box {
+            padding: 30px 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        .button-container {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="recuperation-page">
+    <div class="recuperation-box">
+        <h1> Récupérer mon Badge</h1>
+        
+        <div class="info-message">
+            <strong>Vous avez oublié votre numéro de badge ?</strong>
+            Renseignez vos informations personnelles pour le récupérer immédiatement.
+        </div>
+
+        <form method="POST" action="{{ url_for('recuperer_badge_post') }}">
+            <div class="form-group">
+                <label>Nom de l'Élève *</label>
+                <input type="text" name="nom_eleve" required placeholder="Votre nom">
+            </div>
+
+            <div class="form-group">
+                <label>Prénom de l'Élève *</label>
+                <input type="text" name="prenom_eleve" required placeholder="Votre prénom">
+            </div>
+
+            <div class="form-group">
+                <label>Date de Naissance *</label>
+                <input type="date" name="date_naissance" required>
+            </div>
+
+            <div class="form-group">
+                <label>CIN du Tuteur *</label>
+                <input type="text" name="cin_tuteur" required placeholder="Ex: AB123456">
+            </div>
+
+            <div class="form-group">
+                <label>Téléphone du Tuteur * (10 chiffres)</label>
+                <input type="tel" name="tel_tuteur" maxlength="10" placeholder="0612345678" pattern="[0-9]{10}" required>
+            </div>
+
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary">Récupérer mon Badge</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Retour</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

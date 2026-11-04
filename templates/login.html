@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% block title %}Connexion - Cantine Scolaire{% endblock %}
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-image: url("{{ url_for('static', filename='background.jpeg') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        padding: 20px;
+        position: relative;
+    }
+
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.25);
+        z-index: 0;
+    }
+
+    .login-box {
+        position: relative;
+        z-index: 1;
+        background: transparent;
+        backdrop-filter: none;
+        border-radius: 30px;
+        padding: 50px 40px;
+        box-shadow: none;
+        max-width: 480px;
+        width: 100%;
+        animation: slideUp 0.6s ease-out;
+        border: none;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .logo {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .logo-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        border: 5px solid #4ab6e0;
+        box-shadow: 0 10px 30px rgba(74, 182, 224, 0.4);
+        animation: pulse 2s ease-in-out infinite;
+        overflow: hidden;
+    }
+    
+    .logo-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 10px 30px rgba(74, 182, 224, 0.4);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(74, 182, 224, 0.6);
+        }
+    }
+
+    .logo h1 {
+        font-size: 32px;
+        color: #ffffff;
+        margin: 0 0 10px 0;
+        font-weight: 700;
+        text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .subtitle {
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 15px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 15px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.25);
+        color: #333;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.35);
+    }
+
+    .form-group input::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #db7a2a 0%, #c96a1a 100%);
+        color: white;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        box-shadow: 0 5px 15px rgba(219, 122, 42, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #c96a1a 0%, #b85f10 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(219, 122, 42, 0.5);
+    }
+
+    .btn-primary:active {
+        transform: translateY(-1px);
+    }
+
+    .forgot-badge {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .forgot-badge a {
+        color:  #ffffff;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .forgot-badge a:hover {
+        color:  #c96a1a;
+        text-decoration: underline;
+    }
+
+    .link-button {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .link-button a {
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        padding: 8px 15px;
+        border-radius: 10px;
+        display: inline-block;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .link-button a:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: underline;
+    }
+
+    .decorative-element {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4ab6e0 0%, #2980b9 100%);
+        opacity: 0.15;
+        pointer-events: none;
+    }
+
+    .element-1 {
+        width: 80px;
+        height: 80px;
+        top: -20px;
+        right: -20px;
+        animation: float1 5s ease-in-out infinite;
+    }
+
+    .element-2 {
+        width: 60px;
+        height: 60px;
+        bottom: -15px;
+        left: -15px;
+        animation: float2 6s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        50% {
+            transform: translate(-10px, -10px) rotate(180deg);
+        }
+    }
+
+    @keyframes float2 {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        50% {
+            transform: translate(10px, 10px) rotate(-180deg);
+        }
+    }
+
+    @media screen and (max-width: 576px) {
+        .login-box {
+            padding: 40px 30px;
+        }
+
+        .logo h1 {
+            font-size: 26px;
+        }
+
+        .logo-icon {
+            width: 100px;
+            height: 100px;
+        }
+
+        .btn-primary {
+            padding: 16px;
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-box">
+        <div class="decorative-element element-1"></div>
+        <div class="decorative-element element-2"></div>
+        
+        <div class="logo">
+            <div class="logo-icon">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Cantine">
+            </div>
+            <h1>Cantine Scolaire</h1>
+            <p class="subtitle">Connectez-vous avec votre badge</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label>Numéro de Badge</label>
+                <input type="text" name="badge_num" placeholder="Entrez votre numéro de badge" required autofocus>
+            </div>
+            <button type="submit" class="btn-primary">Se Connecter</button>
+        </form>
+        
+        <!-- NOUVEAU : Lien pour récupérer le badge -->
+        <div class="forgot-badge">
+            <a href="{{ url_for('recuperer_badge') }}">Badge oublié ? Récupérez-le ici</a>
+        </div>
+        
+        <div class="link-button">
+            <a href="{{ url_for('inscription') }}">Pas encore de compte ? Inscrivez-vous</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

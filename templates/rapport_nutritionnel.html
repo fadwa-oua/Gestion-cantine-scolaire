@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% block title %}Rapport Nutritionnel{% endblock %}
+{% block content %}
+<style>
+    body {
+        background-image: url("{{ url_for('static', filename='background-menu.jpeg') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -1;
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        padding: 15px 30px;
+    }
+
+    .navbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 12px;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 20px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+        text-decoration: none;
+    }
+
+    .navbar-brand img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 13px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .contact-icon {
+        font-size: 16px;
+        filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    .contact-item strong {
+        font-weight: 600;
+    }
+
+    .navbar-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-user {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .navbar-user span {
+        color: #ffffff !important;
+        font-weight: 600;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: translateY(-2px);
+    }
+    
+    /* Texte visible */
+    .text-visible {
+        color: #2c3e50 !important;
+    }
+    
+    /* Cartes statistiques */
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 2px solid #f0f0f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .stat-value {
+        font-size: 48px;
+        font-weight: bold;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+    
+    /* Barres de progression */
+    .progress-bar {
+        height: 8px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 15px;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+    }
+    
+    .progress-text {
+        margin-top: 5px;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .dashboard-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        margin-top: 30px;
+    }
+
+    .dashboard-content h2 {
+        color: #333333 !important;
+        text-shadow: none !important;
+        background: none !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    @media (max-width: 768px) {
+        .navbar-top {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .contact-info {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .navbar-bottom {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+
+<div class="navbar">
+    <div class="navbar-top">
+        <a href="{{ url_for('user_dashboard') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <span>{{ cantine_info.nomcantine if cantine_info else 'Cantine Scolaire' }}</span>
+        </a>
+
+        <div class="contact-info">
+            {% if cantine_info %}
+            <div class="contact-item">
+                <span class="contact-icon">📍</span>
+                <span><strong>Adresse:</strong> {{ cantine_info.adress_cantine }}</span>
+            </div>
+            <div class="contact-item">
+                <span class="contact-icon">📞</span>
+                <span><strong>Tél:</strong> {{ cantine_info.numero_du_telephone_de_la_cantine }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="navbar-bottom">
+        <div class="navbar-user">
+            <span>👤 Bonjour, {{ nom }} {{ prenom }}</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-secondary">🚪 Déconnexion</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="dashboard-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 class="text-visible"> Rapport Nutritionnel Personnalisé</h2>
+            <a href="{{ url_for('user_dashboard') }}" class="btn-secondary" style="width: auto; padding: 12px 24px; background: #f0f0f0 !important; color: #333333 !important; border: 2px solid #db7a2a !important; text-shadow: none;">
+                ← Retour
+            </a>
+        </div>
+
+        {% if regime %}
+        <div style="background: linear-gradient(135deg, #db7a2a 0%, #c96a1a 100%); color: white; padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(219, 122, 42, 0.3);">
+            <h3 style="color: white; margin-bottom: 10px;">👤 {{ eleve.prenom_d_eleve }} {{ eleve.nom_d_eleve }}</h3>
+            <p style="margin: 5px 0; font-size: 18px; color: white;"><strong>Régime :</strong> {{ regime }}</p>
+            <p style="margin: 5px 0; color: white;"><strong>Classe :</strong> {{ eleve.class_d_etude }}</p>
+            {% if eleve.allergie %}
+            <p style="margin: 5px 0; color: white;"><strong>Allergies :</strong> {{ eleve.allergie }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div style="background: {% if statut == 'positive' %}#e8f5e9{% else %}#fff3e0{% endif %}; border-left: 4px solid {% if statut == 'positive' %}#4CAF50{% else %}#db7a2a{% endif %}; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
+            <h3 style="color: {% if statut == 'positive' %}#2e7d32{% else %}#c96a1a{% endif %}; margin-bottom: 15px;">
+                {% if statut == 'positive' %} Bilan Positif{% else %}⚠️ Points d'Attention{% endif %}
+            </h3>
+            <p class="text-visible" style="margin-bottom: 15px;"><strong>Période analysée :</strong> 30 derniers jours ({{ nb_repas }} repas)</p>
+            
+            {% if nb_repas == 0 %}
+            <p class="text-visible">Aucune commande n'a été enregistrée sur les 30 derniers jours.</p>
+            {% else %}
+            <h4 style="margin-top: 20px; margin-bottom: 10px; color: {% if statut == 'positive' %}#2e7d32{% else %}#c96a1a{% endif %};">Recommandations :</h4>
+            <ul style="margin-left: 20px;">
+                {% for rec in recommandations %}
+                <li class="text-visible" style="margin: 8px 0;">{{ rec }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        {% if nb_repas > 0 %}
+        <h3 class="text-visible" style="margin-bottom: 20px;"> Vos Moyennes Nutritionnelles</h3>
+        
+        <div class="grid-2" style="gap: 20px; margin-bottom: 30px;">
+            <div class="stat-card">
+                <div style="text-align: center;">
+                    <div class="stat-value" style="color: #db7a2a;">{{ "%.0f"|format(moy_calories) }}</div>
+                    <div class="stat-label">Calories moyennes par repas</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="background: #db7a2a; width: {% if moy_calories > 700 %}100{% else %}{{ (moy_calories/700*100)|int }}{% endif %}%;"></div>
+                    </div>
+                    <div class="progress-text">Recommandé : 500-700 cal</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div style="text-align: center;">
+                    <div class="stat-value" style="color: #db7a2a;">{{ "%.1f"|format(moy_proteines) }}g</div>
+                    <div class="stat-label">Protéines</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="background: #db7a2a; width: {% if moy_proteines > 30 %}100{% else %}{{ (moy_proteines/30*100)|int }}{% endif %}%;"></div>
+                    </div>
+                    <div class="progress-text">Recommandé : 15-30g</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div style="text-align: center;">
+                    <div class="stat-value" style="color: #db7a2a;">{{ "%.1f"|format(moy_glucides) }}g</div>
+                    <div class="stat-label">Glucides</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="background: #db7a2a; width: {% if moy_glucides > 70 %}100{% else %}{{ (moy_glucides/70*100)|int }}{% endif %}%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        {% if regime == 'Diabétique' %}Recommandé : 20-45g{% else %}Recommandé : 45-70g{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div style="text-align: center;">
+                    <div class="stat-value" style="color: #db7a2a;">{{ "%.1f"|format(moy_lipides) }}g</div>
+                    <div class="stat-label">Lipides</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="background: #db7a2a; width: {% if moy_lipides > 25 %}100{% else %}{{ (moy_lipides/25*100)|int }}{% endif %}%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        {% if regime == 'Faible en cholestérol' %}Recommandé : 5-12g{% else %}Recommandé : 10-25g{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);; border: 2px solid #f0f0f0; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h4 class="text-visible" style="margin-bottom: 15px;"> Fibres alimentaires</h4>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="flex: 1;">
+                    <div style="height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                        <div style="height: 100%; background: linear-gradient(90deg, #db7a2a, #c96a1a); width: {% if moy_fibres > 8 %}100{% else %}{{ (moy_fibres/8*100)|int }}{% endif %}%;"></div>
+                    </div>
+                </div>
+                <div style="font-size: 24px; font-weight: bold; color: #db7a2a; min-width: 80px; text-align: right;">
+                    {{ "%.1f"|format(moy_fibres) }}g
+                </div>
+            </div>
+            <p class="text-visible" style="font-size: 14px; margin-top: 10px;">Objectif recommandé : 5-8g de fibres par repas</p>
+        </div>
+
+        <div style="background: #fef5e7; border-left: 4px solid #db7a2a; padding: 20px; border-radius: 8px;">
+            <h4 style="color: #c96a1a; margin-bottom: 10px;"> Conseils Personnalisés</h4>
+            <ul style="margin-left: 20px;">
+                {% if regime == 'Diabétique' %}
+                <li class="text-visible">Privilégiez les aliments à faible index glycémique</li>
+                <li class="text-visible">Évitez les sucres rapides et les desserts sucrés</li>
+                <li class="text-visible">Optez pour les légumes et protéines</li>
+                {% elif regime == 'Végétarien' or regime == 'Végétalien' %}
+                <li class="text-visible">Assurez-vous d'avoir suffisamment de protéines végétales</li>
+                <li class="text-visible">Variez les sources : légumineuses, tofu, quinoa</li>
+                <li class="text-visible">Pensez à la vitamine B12 et au fer</li>
+                {% elif regime == 'Hypertendu' %}
+                <li class="text-visible">Limitez le sel et les aliments transformés</li>
+                <li class="text-visible">Privilégiez les fruits et légumes frais</li>
+                <li class="text-visible">Évitez les charcuteries et plats en sauce</li>
+                {% elif regime == 'Faible en cholestérol' %}
+                <li class="text-visible">Préférez le poisson aux viandes rouges</li>
+                <li class="text-visible">Limitez les produits laitiers entiers</li>
+                <li class="text-visible">Augmentez la consommation de fibres</li>
+                {% else %}
+                <li class="text-visible">Maintenez une alimentation variée et équilibrée</li>
+                <li class="text-visible">Consommez au moins 5 portions de fruits et légumes par jour</li>
+                <li class="text-visible">Hydratez-vous régulièrement</li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

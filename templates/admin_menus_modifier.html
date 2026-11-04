@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}Modifier Menu{% endblock %}
+{% block content %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: url("{{ url_for('static', filename='background.jpeg') }}") no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+    .admin-nav {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #333333; }
+    .logo img { width: 40px; height: 40px; border-radius: 50%; }
+    .sidebar { position: fixed; left: 0; top: 70px; width: 250px; height: calc(100vh - 70px); background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); padding: 20px 0; }
+    .sidebar a { display: block; padding: 15px 25px; color: #555555; text-decoration: none; transition: all 0.3s ease; border-left: 4px solid transparent; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(102, 126, 234, 0.1); color:#cd6300; border-left-color:#cd6300; }
+    .main-content { margin-left: 250px; padding: 30px; }
+    h1 { color: white; margin-bottom: 30px; font-size: 28px; }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 900px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333333;
+    }
+
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #eeeeee;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+        outline: none;
+        border-color:#cd6300;
+    }
+
+    .repas-selection {
+        border: 2px solid #eeeeee;
+        border-radius: 10px;
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .repas-item {
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .repas-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 15px;
+        background: linear-gradient(135deg,#cd6300 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-cancel {
+        flex: 1;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        color: #333333;
+        border: 2px solid #eeeeee;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+</style>
+
+<div class="admin-nav">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <span>Admin - Cantine Scolaire</span>
+    </div>
+    <div>
+        <span style="margin-right: 15px; font-weight: 600;">👤 {{ nom }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Déconnexion</a>
+    </div>
+</div>
+
+<div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+    <a href="{{ url_for('admin_menus') }}" class="active"> Menus</a>
+    <a href="{{ url_for('admin_repas') }}"> Repas</a>
+    <a href="{{ url_for('admin_commandes') }}"> Commandes</a>
+    <a href="{{ url_for('admin_eleves') }}"> Élèves</a>
+    <a href="{{ url_for('admin_stock') }}"> Stock</a>
+    <a href="{{ url_for('admin_paiements') }}"> Paiements</a>
+    <a href="{{ url_for('admin_employees') }}"> Employés</a>
+</div>
+
+<div class="main-content">
+    <h1> Modifier le Menu</h1>
+
+    <div class="form-container">
+        <form method="POST">
+            <div class="form-group">
+                <label for="nom">Nom du Menu *</label>
+                <input type="text" id="nom" name="nom" value="{{ menu.nom_de_menu }}" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="type">Type de Menu *</label>
+                    <select id="type" name="type" required>
+                        <option value="Menu Boisson" {% if menu.type_de_menu == 'Menu Boisson' %}selected{% endif %}>Menu Boisson</option>
+                        <option value="Menu Salade" {% if menu.type_de_menu == 'Menu Salade' %}selected{% endif %}>Menu Salade</option>
+                        <option value="Menu Pizza" {% if menu.type_de_menu == 'Menu Pizza' %}selected{% endif %}>Menu Pizza</option>
+                        <option value="Menu Sandwich" {% if menu.type_de_menu == 'Menu Sandwich' %}selected{% endif %}>Menu Sandwich</option>
+                        <option value="Menu Complet" {% if menu.type_de_menu == 'Menu Complet' %}selected{% endif %}>Menu Complet</option>
+                        <option value="Menu Végétarien" {% if menu.type_de_menu == 'Menu Végétarien' %}selected{% endif %}>Menu Végétarien</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date du Menu *</label>
+                    <input type="date" id="date" name="date" value="{{ menu.date_de_menu }}" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="calories">Calories Totales</label>
+                    <input type="number" id="calories" name="calories" value="{{ menu.calories }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="publie">Statut de Publication</label>
+                    <select id="publie" name="publie">
+                        <option value="0" {% if menu.publie == 0 %}selected{% endif %}>Non publié</option>
+                        <option value="1" {% if menu.publie == 1 %}selected{% endif %}>Publié</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Sélectionner les Repas *</label>
+                <div class="repas-selection">
+                    {% for r in repas %}
+                    <div class="repas-item">
+                        <input type="checkbox" name="repas_ids" value="{{ r.id_repas }}" 
+                               id="repas_{{ r.id_repas }}"
+                               {% if r.id_repas in repas_menu_ids %}checked{% endif %}>
+                        <label for="repas_{{ r.id_repas }}" style="margin: 0; cursor: pointer; flex: 1;">
+                            {{ r.nom_du_repas }} ({{ r.type }}) - {{ "%.2f"|format(r.prix) }} DH
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('admin_menus') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">✓ Enregistrer les Modifications</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

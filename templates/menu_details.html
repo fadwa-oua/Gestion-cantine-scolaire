@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+{% block title %}Détails du Menu{% endblock %}
+{% block content %}
+<style>
+    body {
+        background-image: url("{{ url_for('static', filename='background-menu.jpeg') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -1;
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        padding: 15px 30px;
+    }
+
+    .navbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 12px;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 20px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+        text-decoration: none;
+    }
+
+    .navbar-brand img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 13px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .contact-icon {
+        font-size: 16px;
+        filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    .contact-item strong {
+        font-weight: 600;
+    }
+
+    .navbar-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-user {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .navbar-user span {
+        color: #ffffff !important;
+        font-weight: 600;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .menu-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .menu-header-image {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 15px;
+        border: 3px solid #db7a2a;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .menu-header-content h1 {
+        color: #333333;
+        margin-bottom: 15px;
+    }
+
+    .menu-header-content p {
+        color: #555555;
+        margin: 8px 0;
+        font-size: 16px;
+    }
+
+    .repas-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+
+    .repas-card:hover {
+        transform: translateX(5px);
+    }
+
+    .repas-type-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .type-entree {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+    }
+
+    .type-plat {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+    }
+
+    .type-accompagnement {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+        color: white;
+    }
+
+    .type-dessert {
+        background: linear-gradient(135deg, #E91E63, #C2185B);
+        color: white;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .quantity-btn {
+        width: 35px;
+        height: 35px;
+        border: 2px solid #db7a2a;
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        color: #db7a2a;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-btn:hover {
+        background: #db7a2a;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .quantity-display {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333333;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .btn-add-cart {
+        background: linear-gradient(135deg, #db7a2a 0%, #c96a1a 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-cart:hover {
+        background: linear-gradient(135deg, #c96a1a 0%, #b85f10 100%);
+        transform: scale(1.05);
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.9);
+        color: #333333;
+        border: 2px solid #db7a2a;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #db7a2a;
+        color: white;
+    }
+
+    .repas-info {
+        flex: 1;
+    }
+
+    .repas-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333333;
+        margin-bottom: 5px;
+    }
+
+    .repas-description {
+        color: #666666;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .repas-details {
+        display: flex;
+        gap: 15px;
+        font-size: 13px;
+        color: #777777;
+    }
+
+    .price {
+        color: #db7a2a;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .panier-fixed {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        min-width: 250px;
+        z-index: 1000;
+    }
+
+    .panier-fixed h4 {
+        color: #333333;
+        margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .navbar-top {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .contact-info {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .navbar-bottom {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="navbar">
+    <div class="navbar-top">
+        <a href="{{ url_for('user_dashboard') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <span>{{ cantine_info.nomcantine if cantine_info else 'Cantine Scolaire' }}</span>
+        </a>
+
+        <div class="contact-info">
+            {% if cantine_info %}
+            <div class="contact-item">
+                <span class="contact-icon">📍</span>
+                <span><strong>Adresse:</strong> {{ cantine_info.adress_cantine }}</span>
+            </div>
+            <div class="contact-item">
+                <span class="contact-icon">📞</span>
+                <span><strong>Tél:</strong> {{ cantine_info.numero_du_telephone_de_la_cantine }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="navbar-bottom">
+        <div class="navbar-user">
+            <span>👤 Bonjour, {{ prenom }} {{ nom }}</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-secondary">🚪 Déconnexion</a>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 30px; margin-bottom: 100px;">
+    <a href="{{ url_for('user_dashboard') }}" class="btn-back">← Retour aux Menus</a>
+    
+    <div class="menu-header">
+        <img src="{{ url_for('static', filename='menu-' ~ menu.id_menus ~ '.jpeg') }}" 
+             alt="{{ menu.nom_de_menu }}" 
+             class="menu-header-image"
+             onerror="this.src='{{ url_for('static', filename='default-menu.jpeg') }}'">
+        <div class="menu-header-content">
+            <h1>{{ menu.nom_de_menu }}</h1>
+            <p><strong>Type:</strong> {{ menu.type_de_menu }}</p>
+            <p><strong>Date:</strong> {{ menu.date_de_menu }}</p>
+            <p><strong>Calories totales:</strong> {{ menu.calories }} kcal</p>
+        </div>
+    </div>
+
+<h2 style="color: white; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8); margin-bottom: 20px;">
+    🍽️ Repas Inclus
+</h2>
+
+{% if regime_eleve %}
+<div style="background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #2196F3;">
+    <strong style="color: #2196F3;">ℹ️ Votre régime alimentaire :</strong> 
+    <span style="color: #333333;">{{ regime_eleve }}</span>
+    <p style="color: #666666; font-size: 14px; margin-top: 5px;">
+        Seuls les repas compatibles avec votre régime sont affichés ci-dessous.
+    </p>
+</div>
+{% endif %}
+
+{% if repas_menu|length == 0 %}
+<div style="background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 15px; text-align: center;">
+    <p style="color: #666666; font-size: 18px;">
+        ⚠️ Aucun repas compatible avec votre régime alimentaire ({{ regime_eleve }}) n'est disponible dans ce menu.
+    </p>
+    <a href="{{ url_for('user_dashboard') }}" class="btn-back" style="margin-top: 20px;">
+        ← Retour aux Menus
+    </a>
+</div>
+{% else %}
+    {% for repas in repas_menu %}
+    <div class="repas-card">
+        <div class="repas-info">
+            <span class="repas-type-badge 
+                {% if repas.type == 'Entrée' %}type-entree
+                {% elif repas.type == 'Plat Principal' %}type-plat
+                {% elif repas.type == 'Accompagnement' %}type-accompagnement
+                {% elif repas.type == 'Dessert' %}type-dessert
+                {% endif %}">
+                {{ repas.type }}
+            </span>
+            <div class="repas-name">{{ repas.nom_du_repas }}</div>
+            <div class="repas-description">{{ repas.description }}</div>
+            <div class="repas-details">
+                <span>  {{ repas.calories }} kcal</span>
+                <span>  {{ repas.glucides }}g glucides</span>
+                <span>  {{ repas.lipides }}g lipides</span>
+                <span>  {{ repas.proteines }}g protéines</span>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <div class="price">{{ "%.2f"|format(repas.prix) }} DH</div>
+            <div class="quantity-controls">
+                <button class="quantity-btn" onclick="decreaseQuantity({{ repas.id_repas }})">-</button>
+                <span class="quantity-display" id="qty-{{ repas.id_repas }}">0</span>
+                <button class="quantity-btn" onclick="increaseQuantity({{ repas.id_repas }})">+</button>
+            </div>
+            <button class="btn-add-cart" onclick="addToCart({{ repas.id_repas }}, '{{ repas.nom_du_repas }}', {{ repas.prix }})">
+                🛒 Ajouter
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+{% if repas_non_compatibles|length > 0 %}
+<div style="margin-top: 40px;">
+    <h3 style="color: white; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8); margin-bottom: 20px;">
+        ⚠️ Repas Non Compatibles avec Votre Régime
+    </h3>
+    <p style="background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 10px; color: #666666; margin-bottom: 20px;">
+        Ces repas ne sont pas compatibles avec votre régime alimentaire ({{ regime_eleve }}) et ne peuvent pas être commandés.
+    </p>
+    
+    {% for repas in repas_non_compatibles %}
+    <div class="repas-card" style="opacity: 0.6; position: relative;">
+        <div style="position: absolute; top: 10px; right: 10px; background: #f44336; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 12px;">
+             NON COMPATIBLE
+        </div>
+        <div class="repas-info">
+            <span class="repas-type-badge 
+                {% if repas.type == 'Entrée' %}type-entree
+                {% elif repas.type == 'Plat Principal' %}type-plat
+                {% elif repas.type == 'Accompagnement' %}type-accompagnement
+                {% elif repas.type == 'Dessert' %}type-dessert
+                {% endif %}">
+                {{ repas.type }}
+            </span>
+            <div class="repas-name">{{ repas.nom_du_repas }}</div>
+            <div class="repas-description">{{ repas.description }}</div>
+            <div class="repas-details">
+                <span> {{ repas.calories }} kcal</span>
+                <span> {{ repas.glucides }}g glucides</span>
+                <span> {{ repas.lipides }}g lipides</span>
+                <span> {{ repas.proteines }}g protéines</span>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <div class="price">{{ "%.2f"|format(repas.prix) }} DH</div>
+            <div style="background: rgba(244, 67, 54, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <p style="color: #f44336; font-size: 13px; font-weight: 600; margin: 0;">
+                     Ce repas n'est pas compatible avec votre régime
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+    {% if panier|length > 0 %}
+    <div class="panier-fixed">
+        <h4> Panier ({{ panier|length }} articles)</h4>
+        <div class="price" style="font-size: 24px;">{{ "%.2f"|format(total) }} DH</div>
+        <a href="{{ url_for('user_dashboard') }}" class="btn-add-cart" style="display: block; text-align: center; margin-top: 10px; text-decoration: none;">
+            Voir le Panier
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let quantities = {};
+
+function increaseQuantity(repasId) {
+    if (!quantities[repasId]) quantities[repasId] = 0;
+    quantities[repasId]++;
+    document.getElementById('qty-' + repasId).textContent = quantities[repasId];
+}
+
+function decreaseQuantity(repasId) {
+    if (!quantities[repasId]) quantities[repasId] = 0;
+    if (quantities[repasId] > 0) {
+        quantities[repasId]--;
+        document.getElementById('qty-' + repasId).textContent = quantities[repasId];
+    }
+}
+
+function addToCart(repasId, repasNom, repasPrix) {
+    const qty = quantities[repasId] || 0;
+    if (qty === 0) {
+        alert('Veuillez sélectionner une quantité supérieure à 0');
+        return;
+    }
+    
+    window.location.href = `/user/ajouter-repas-panier/${repasId}/${qty}`;
+}
+</script>
+
+{% endblock %}

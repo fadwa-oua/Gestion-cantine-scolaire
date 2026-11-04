@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% block title %}Statut de Mes Commandes{% endblock %}
+{% block content %}
+<style>
+    body {
+        background-image: url("{{ url_for('static', filename='background-menu.jpeg') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -1;
+    }
+
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        padding: 15px 30px;
+    }
+
+    .navbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 20px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+        text-decoration: none;
+    }
+
+    .navbar-brand img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .contact-item {
+        color: white;
+        font-size: 14px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    }
+
+    .contact-icon {
+        margin-right: 5px;
+    }
+
+    .page-title {
+        color: white;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .commande-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .commande-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .commande-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(219, 122, 42, 0.3);
+    }
+
+    .commande-id {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333333;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .status-en-attente {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+    }
+
+    .status-en-preparation {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+        color: white;
+    }
+
+    .status-preparee {
+        background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+        color: white;
+    }
+
+    .status-validee {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+    }
+
+    .status-non-payee {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+    }
+
+    .commande-details {
+        color: #555555;
+        line-height: 1.8;
+    }
+
+    .commande-details strong {
+        color: #333333;
+    }
+
+    .price {
+        color: #db7a2a;
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    .timeline {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 25px;
+        width: 2px;
+        height: 100%;
+        background: #ddd;
+    }
+
+    .timeline-item:last-child::before {
+        display: none;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: 8px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid #ddd;
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+    }
+
+    .timeline-dot.active {
+        border-color: #4CAF50;
+        background: #4CAF50;
+    }
+
+    .timeline-content {
+        color: #666666;
+    }
+
+    .timeline-content.active {
+        color: #333333;
+        font-weight: 700;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.9);
+        color: #333333;
+        border: 2px solid #db7a2a;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #db7a2a;
+        color: white;
+    }
+
+    .no-commandes {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .no-commandes h3 {
+        color: #333333;
+        margin-bottom: 20px;
+    }
+
+    .no-commandes p {
+        color: #666666;
+        margin-bottom: 25px;
+    }
+
+    /* Ajout de padding-top au container pour compenser la navbar fixe */
+    .main-container {
+        padding-top: 100px;
+    }
+</style>
+
+<div class="navbar">
+    <div class="navbar-top">
+        <a href="{{ url_for('user_dashboard') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <span>{{ cantine_info.nomcantine if cantine_info else 'Cantine Scolaire' }}</span>
+        </a>
+
+        <div class="contact-info">
+            {% if cantine_info %}
+            <div class="contact-item">
+                <span class="contact-icon">📍</span>
+                <span><strong>Adresse:</strong> {{ cantine_info.adress_cantine }}</span>
+            </div>
+            <div class="contact-item">
+                <span class="contact-icon">📞</span>
+                <span><strong>Tél:</strong> {{ cantine_info.numero_du_telephone_de_la_cantine }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container main-container" style="margin-bottom: 50px;">
+    <a href="{{ url_for('user_dashboard') }}" class="btn-back">← Retour au Dashboard</a>
+    
+    <div class="page-title">
+        <h1> Statut de Mes Commandes</h1>
+        <p style="margin-top: 10px; font-size: 16px;">Suivez l'état de vos commandes en temps réel</p>
+    </div>
+
+    {% if commandes|length == 0 %}
+    <div class="no-commandes">
+        <h3>Aucune commande pour le moment</h3>
+        <p>Vous n'avez pas encore passé de commande. Découvrez nos menus et commencez à commander !</p>
+        <a href="{{ url_for('user_dashboard') }}" class="btn-back" style="margin: 0;">
+            Voir les Menus Disponibles
+        </a>
+    </div>
+    {% else %}
+    {% for commande in commandes %}
+    <div class="commande-card">
+        <div class="commande-header">
+            <div>
+                <div class="commande-id">Commande #{{ commande.id_commande }}</div>
+                <div style="color: #666666; font-size: 14px; margin-top: 5px;">
+                     {{ commande.date_de_commande }}
+                </div>
+            </div>
+            <div>
+                <span class="status-badge 
+                    {% if commande.status_de_commande == 'En attente' %}status-en-attente
+                    {% elif commande.status_de_commande == 'En préparation' %}status-en-preparation
+                    {% elif commande.status_de_commande == 'Préparée' %}status-preparee
+                    {% elif commande.status_de_commande == 'Validée' or commande.status_de_commande == 'Payée' %}status-validee
+                    {% else %}status-non-payee
+                    {% endif %}">
+                    {{ commande.status_de_commande }}
+                </span>
+            </div>
+        </div>
+
+        <div class="commande-details">
+            {% if commande.repas_list %}
+            <p><strong>Repas commandés:</strong></p>
+            <p style="margin-left: 20px; margin-top: 10px;">{{ commande.repas_list }}</p>
+            {% endif %}
+            
+            <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <strong>Montant total:</strong>
+                <span class="price">{{ "%.2f"|format(commande.montant_du_commande) }} DH</span>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot {% if commande.status_de_commande in ['En attente', 'En préparation', 'Préparée', 'Validée', 'Payée'] %}active{% endif %}"></div>
+                <div class="timeline-content {% if commande.status_de_commande in ['En attente', 'En préparation', 'Préparée', 'Validée', 'Payée'] %}active{% endif %}">
+                     Commande reçue
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot {% if commande.status_de_commande in ['En préparation', 'Préparée', 'Validée', 'Payée'] %}active{% endif %}"></div>
+                <div class="timeline-content {% if commande.status_de_commande in ['En préparation', 'Préparée', 'Validée', 'Payée'] %}active{% endif %}">
+                     En cours de préparation
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot {% if commande.status_de_commande in ['Préparée', 'Validée', 'Payée'] %}active{% endif %}"></div>
+                <div class="timeline-content {% if commande.status_de_commande in ['Préparée', 'Validée', 'Payée'] %}active{% endif %}">
+                    ✅ Préparée - Prête à récupérer
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot {% if commande.status_de_commande in ['Validée', 'Payée'] %}active{% endif %}"></div>
+                <div class="timeline-content {% if commande.status_de_commande in ['Validée', 'Payée'] %}active{% endif %}">
+                     Payée et validée
+                </div>
+            </div>
+        </div>
+
+        {% if commande.status_de_commande == 'Préparée' %}
+        <div style="margin-top: 20px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4CAF50; border-radius: 5px;">
+            <strong style="color: #4CAF50;"> Votre commande est prête !</strong>
+            <p style="margin-top: 5px; color: #666666;">Vous pouvez venir la récupérer à la cantine et effectuer le paiement.</p>
+        </div>
+        {% elif commande.status_de_commande == 'En préparation' %}
+        <div style="margin-top: 20px; padding: 15px; background: rgba(33, 150, 243, 0.1); border-left: 4px solid #2196F3; border-radius: 5px;">
+            <strong style="color: #2196F3;"> En cours de préparation</strong>
+            <p style="margin-top: 5px; color: #666666;">Votre commande est actuellement en préparation par notre équipe.</p>
+        </div>
+        {% elif commande.status_de_commande == 'En attente' %}
+        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 152, 0, 0.1); border-left: 4px solid #ff9800; border-radius: 5px;">
+            <strong style="color: #ff9800;"> En attente</strong>
+            <p style="margin-top: 5px; color: #666666;">Votre commande a été reçue et sera bientôt prise en charge.</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}

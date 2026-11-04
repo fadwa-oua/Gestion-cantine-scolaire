@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Utilisateur{% endblock %}
+{% block content %}
+<style>
+    body {
+        background-image: url("{{ url_for('static', filename='background-menu.jpeg') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        position: relative;
+        min-height: 100vh;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -1;
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        padding: 15px 30px;
+    }
+
+    .navbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 12px;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 20px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+        text-decoration: none;
+    }
+
+    .navbar-brand img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 13px;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .contact-icon {
+        font-size: 16px;
+        filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    .contact-item strong {
+        font-weight: 600;
+    }
+
+    .navbar-bottom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .navbar-user {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .navbar-user span {
+        color: #ffffff !important;
+        font-weight: 600;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .menu-card {
+        background:  rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .menu-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-bottom: 2px solid rgba(219, 122, 42, 0.3);
+    }
+
+    .menu-content {
+        padding: 20px;
+        
+    }
+
+    .menu-card h3 {
+        color: #333333;
+        text-shadow: none;
+        margin-bottom: 10px;
+    }
+
+    .menu-card p {
+        color: #555555 !important;
+        text-shadow: none;
+    }
+
+    .btn-discover {
+        background: linear-gradient(135deg, #db7a2a 0%, #c96a1a 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 15px;
+    }
+
+    .btn-discover:hover {
+        background: linear-gradient(135deg, #c96a1a 0%, #b85f10 100%) !important;
+        transform: scale(1.05);
+    }
+
+    .panier {
+        background:  rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+    }
+
+    .panier h3 {
+        color: #333333;
+        text-shadow: none;
+        margin-bottom: 20px;
+    }
+
+    .panier-item {
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-content h2 {
+        color: #ffffff;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 20px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .alert-box {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        color: #333333 !important;
+        text-shadow: none;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .price {
+        color: #db7a2a !important;
+        text-shadow: none;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .btn-status {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .btn-status:hover {
+        background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%) !important;
+        transform: scale(1.05);
+    }
+
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .navbar-top {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .contact-info {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .navbar-bottom {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+
+<div class="navbar">
+    <div class="navbar-top">
+        <a href="{{ url_for('user_dashboard') }}" class="navbar-brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <span>{{ cantine_info.nomcantine if cantine_info else 'Cantine Scolaire' }}</span>
+        </a>
+
+        <div class="contact-info">
+            {% if cantine_info %}
+            <div class="contact-item">
+                <span class="contact-icon">📍</span>
+                <span><strong>Adresse:</strong> {{ cantine_info.adress_cantine }}</span>
+            </div>
+            <div class="contact-item">
+                <span class="contact-icon">📞</span>
+                <span><strong>Tél:</strong> {{ cantine_info.numero_du_telephone_de_la_cantine }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="navbar-bottom">
+        <div class="navbar-user">
+            <span>👤 Bonjour, {{ nom }} {{ prenom }} </span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-secondary">🚪 Déconnexion</a>
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="dashboard-content">
+        <div class="header-section">
+            <h2> Menus Disponibles Cette Semaine</h2>
+            <div>
+                <a href="{{ url_for('rapport_nutritionnel') }}" class="btn-discover" style="margin-right: 10px;">
+                     Mon rapport nutritionnel
+                </a>
+                <a href="{{ url_for('status_commandes') }}" class="btn-status">
+                     Voir le Statut de Ma Commande
+                </a>
+            </div>
+        </div>
+        
+        {% if menus|length == 0 %}
+        <div class="alert-box">
+            Aucun menu n'est disponible pour cette semaine.
+        </div>
+        {% else %}
+        <div class="menu-grid">
+            {% for menu in menus %}
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='menu-' ~ menu.id_menus ~ '.jpeg') }}" 
+                     alt="{{ menu.nom_de_menu }}" 
+                     class="menu-image"
+                     onerror="this.src='{{ url_for('static', filename='default-menu.jpeg') }}'">
+                <div class="menu-content">
+                    <h3>{{ menu.nom_de_menu }}</h3>
+                    <p style="margin: 10px 0;">
+                        <strong style="color: #000000;">Type :</strong> <span style="color: #ffffff; font-weight: 500;">{{ menu.type_de_menu }}</span>
+                    </p>
+                    <p>
+                        <strong style="color: #000000;">Date :</strong> <span style="color: #ffffff; font-weight: 500;">{{ menu.date_de_menu }}</span>
+                    </p>
+                    <p style="font-size: 14px;">
+                        <strong style="color: #000000;">Calories :</strong> <span style="color: #ffffff; font-weight: 500;">{{ menu.calories }} kcal</span>
+                    </p>
+                    
+                    <a href="{{ url_for('menu_details', menu_id=menu.id_menus) }}" class="btn-discover">
+                         Découvrir les Repas
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if panier|length > 0 %}
+        <div class="panier">
+            <h3>🛒 Mon Panier</h3>
+            {% for item in panier %}
+            <div class="panier-item">
+                <div>
+                    <strong>{{ item.nom }}</strong>
+                    {% if item.type == 'repas' %}
+                    <span style="background: rgba(227, 242, 253, 0.5); color: #1976d2; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 5px; border: 1px solid rgba(25, 118, 210, 0.5);">Repas individuel</span>
+                    {% else %}
+                    <span style="background: rgba(243, 229, 245, 0.5); color: #7b1fa2; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 5px; border: 1px solid rgba(123, 31, 162, 0.5);">Menu</span>
+                    {% endif %}
+                    <p style="color: #555555; font-size: 14px; margin-top: 5px;">Quantité: {{ item.quantite }}</p>
+                </div>
+                <div style="text-align: right;">
+                    <strong class="price">{{ "%.2f"|format(item.prix * item.quantite) }} DH</strong>
+                    <a href="{{ url_for('retirer_panier', index=loop.index0) }}" style="display: block; margin-top: 8px; background: #f44336; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 14px; transition: all 0.3s ease;">
+                         Retirer
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid rgba(0, 0, 0, 0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #333333;">Total:</h3>
+                    <h2 class="price">{{ "%.2f"|format(total) }} DH</h2>
+                </div>
+                <div class="alert-box" style="margin-bottom: 15px;">
+                    <strong>💳 Paiement:</strong> Vous paierez en CASH à la cantine lors du retrait de votre commande.
+                </div>
+                <form method="POST" action="{{ url_for('commander') }}">
+                    <button type="submit" class="btn-discover" style="width: 100%; margin-top: 0;">
+                        ✓ Valider la Commande
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

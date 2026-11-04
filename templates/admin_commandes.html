@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block title %}Gestion des Commandes{% endblock %}
+{% block content %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: url("{{ url_for('static', filename='background.jpeg') }}") no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+    .admin-nav {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #333333; }
+    .logo img { width: 40px; height: 40px; border-radius: 50%; }
+    .sidebar { position: fixed; left: 0; top: 70px; width: 250px; height: calc(100vh - 70px); background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); padding: 20px 0; }
+    .sidebar a { display: block; padding: 15px 25px; color: #555555; text-decoration: none; transition: all 0.3s ease; border-left: 4px solid transparent; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(102, 126, 234, 0.1); color: #cd6300; border-left-color: #cd6300; }
+    .main-content { margin-left: 250px; padding: 30px; }
+    h1 { color: white; margin-bottom: 30px; font-size: 28px; }
+
+    .search-box {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #eeeeee;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #cd6300;
+    }
+
+    .commande-card {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+    }
+
+    .commande-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .commande-id {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333333;
+    }
+
+    .commande-eleve {
+        font-size: 14px;
+        color: #666666;
+        margin-top: 5px;
+    }
+
+    .status-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .status-select {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 2px solid #eeeeee;
+        font-weight: 600;
+        cursor: pointer;
+        min-width: 180px;
+    }
+
+    .status-en-attente {
+        background: #fff3e0;
+        border-color: #ff9800;
+        color: #f57c00;
+    }
+
+    .status-en-preparation {
+        background: #e3f2fd;
+        border-color: #2196F3;
+        color: #1976D2;
+    }
+
+    .status-preparee {
+        background: #f3e5f5;
+        border-color: #9C27B0;
+        color: #7B1FA2;
+    }
+
+    .status-validee {
+        background: #e8f5e9;
+        border-color: #4CAF50;
+        color: #45a049;
+    }
+
+    .btn-update {
+        background: #cd6300;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-update:hover {
+        background: #5568d3;
+        transform: scale(1.05);
+    }
+
+    .commande-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        color: #666666;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #333333;
+        font-size: 13px;
+    }
+
+    .montant {
+        color: #db7a2a;
+        font-weight: 700;
+        font-size: 20px;
+    }
+
+    .total-count {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: #cd6300;
+    }
+</style>
+
+<div class="admin-nav">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <span>Admin - Cantine Scolaire</span>
+    </div>
+    <div>
+        <span style="margin-right: 15px; font-weight: 600;">👤 {{ nom }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Déconnexion</a>
+    </div>
+</div>
+
+<div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('admin_menus') }}"> Menus</a>
+    <a href="{{ url_for('admin_repas') }}"> Repas</a>
+    <a href="{{ url_for('admin_commandes') }}" class="active"> Commandes</a>
+    <a href="{{ url_for('admin_eleves') }}"> Élèves</a>
+    <a href="{{ url_for('admin_stock') }}"> Stock</a>
+    <a href="{{ url_for('admin_paiements') }}"> Paiements</a>
+    <a href="{{ url_for('admin_employees') }}"> Employés</a>
+</div>
+
+<div class="main-content">
+    <h1> Gestion des Commandes</h1>
+
+    <div class="total-count">
+        Total: <span id="total-commandes">{{ commandes|length }}</span> commande(s)
+    </div>
+
+    <div class="search-box">
+        <input type="text" 
+               id="search-input" 
+               placeholder=" Rechercher par numéro de commande ou nom d'élève..." 
+               autocomplete="off">
+    </div>
+
+    <div id="commandes-container">
+        {% if commandes|length == 0 %}
+        <div style="background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);; padding: 40px; border-radius: 15px; text-align: center; color: #666666;">
+            <p style="font-size: 18px;">Aucune commande enregistrée</p>
+        </div>
+        {% else %}
+        {% for commande in commandes %}
+        <div class="commande-card">
+            <div class="commande-header">
+                <div>
+                    <div class="commande-id">Commande #{{ commande.id_commande }}</div>
+                    <div class="commande-eleve">
+                         {{ commande.prenom_d_eleve }} {{ commande.nom_d_eleve }} 
+                        (Badge: {{ commande.num_de_badge }})
+                    </div>
+                </div>
+                <form method="POST" action="{{ url_for('admin_changer_statut', commande_id=commande.id_commande) }}" class="status-form">
+                    <select name="statut" class="status-select 
+                        {% if commande.status_de_commande == 'En attente' %}status-en-attente
+                        {% elif commande.status_de_commande == 'En préparation' %}status-en-preparation
+                        {% elif commande.status_de_commande == 'Préparée' %}status-preparee
+                        {% elif commande.status_de_commande in ['Validée', 'Payée'] %}status-validee
+                        {% endif %}" required>
+                        <option value="En attente" {% if commande.status_de_commande == 'En attente' %}selected{% endif %}>En attente</option>
+                        <option value="En préparation" {% if commande.status_de_commande == 'En préparation' %}selected{% endif %}>En préparation</option>
+                        <option value="Préparée" {% if commande.status_de_commande == 'Préparée' %}selected{% endif %}>Préparée</option>
+                        <option value="Validée" {% if commande.status_de_commande in ['Validée', 'Payée'] %}selected{% endif %}>Validée</option>
+                    </select>
+                    <button type="submit" class="btn-update">✓ Mettre à jour</button>
+                </form>
+            </div>
+
+            <div class="commande-details">
+                <div class="detail-item">
+                    <span class="detail-label">Date de commande</span>
+                    <span>{{ commande.date_de_commande }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Montant</span>
+                    <span class="montant">{{ "%.2f"|format(commande.montant_du_commande) }} DH</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Statut actuel</span>
+                    <span>{{ commande.status_de_commande }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const searchInput = document.getElementById('search-input');
+const commandesContainer = document.getElementById('commandes-container');
+const totalCommandesSpan = document.getElementById('total-commandes');
+let searchTimeout;
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    
+    const query = this.value.trim();
+    
+    if (query.length === 0) {
+        window.location.href = "{{ url_for('admin_commandes') }}";
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`{{ url_for('admin_commandes_recherche') }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.commandes.length === 0) {
+                    commandesContainer.innerHTML = `
+                        <div style="background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);; padding: 40px; border-radius: 15px; text-align: center; color: #666666;">
+                            <p style="font-size: 18px;">Aucune commande trouvée pour "${query}"</p>
+                        </div>
+                    `;
+                    totalCommandesSpan.textContent = '0';
+                } else {
+                    totalCommandesSpan.textContent = data.commandes.length;
+                    commandesContainer.innerHTML = data.commandes.map(cmd => {
+                        const statusClass = cmd.status_de_commande === 'En attente' ? 'status-en-attente' :
+                                          cmd.status_de_commande === 'En préparation' ? 'status-en-preparation' :
+                                          cmd.status_de_commande === 'Préparée' ? 'status-preparee' : 'status-validee';
+                        
+                        return `
+                        <div class="commande-card">
+                            <div class="commande-header">
+                                <div>
+                                    <div class="commande-id">Commande #${cmd.id_commande}</div>
+                                    <div class="commande-eleve">
+                                        👤 ${cmd.prenom_d_eleve} ${cmd.nom_d_eleve} 
+                                        (Badge: ${cmd.num_de_badge})
+                                    </div>
+                                </div>
+                                <form method="POST" action="/admin/commandes/changer-statut/${cmd.id_commande}" class="status-form">
+                                    <select name="statut" class="status-select ${statusClass}" required>
+                                        <option value="En attente" ${cmd.status_de_commande === 'En attente' ? 'selected' : ''}>En attente</option>
+                                        <option value="En préparation" ${cmd.status_de_commande === 'En préparation' ? 'selected' : ''}>En préparation</option>
+                                        <option value="Préparée" ${cmd.status_de_commande === 'Préparée' ? 'selected' : ''}>Préparée</option>
+                                        <option value="Validée" ${cmd.status_de_commande === 'Validée' || cmd.status_de_commande === 'Payée' ? 'selected' : ''}>Validée</option>
+                                    </select>
+                                    <button type="submit" class="btn-update">✓ Mettre à jour</button>
+                                </form>
+                            </div>
+                            <div class="commande-details">
+                                <div class="detail-item">
+                                    <span class="detail-label"> Date de commande</span>
+                                    <span>${cmd.date_de_commande}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label"> Montant</span>
+                                    <span class="montant">${cmd.montant_du_commande.toFixed(2)} DH</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label"> Statut actuel</span>
+                                    <span>${cmd.status_de_commande}</span>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+    }, 300);
+});
+
+// Changement de couleur du select
+document.addEventListener('change', function(e) {
+    if (e.target.matches('.status-select')) {
+        e.target.className = 'status-select';
+        const value = e.target.value;
+        if (value === 'En attente') e.target.classList.add('status-en-attente');
+        else if (value === 'En préparation') e.target.classList.add('status-en-preparation');
+        else if (value === 'Préparée') e.target.classList.add('status-preparee');
+        else if (value === 'Validée') e.target.classList.add('status-validee');
+    }
+});
+</script>
+
+{% endblock %}

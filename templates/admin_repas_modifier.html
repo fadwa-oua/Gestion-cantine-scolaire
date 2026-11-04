@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% block title %}Modifier Repas{% endblock %}
+{% block content %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: url("{{ url_for('static', filename='background.jpeg') }}") no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+    .admin-nav {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #333333; }
+    .logo img { width: 40px; height: 40px; border-radius: 50%; }
+    .sidebar { position: fixed; left: 0; top: 70px; width: 250px; height: calc(100vh - 70px); background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(10px); box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); padding: 20px 0; }
+    .sidebar a { display: block; padding: 15px 25px; color: #555555; text-decoration: none; transition: all 0.3s ease; border-left: 4px solid transparent; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(102, 126, 234, 0.1); color:#cd6300; border-left-color:#cd6300; }
+    .main-content { margin-left: 250px; padding: 30px; }
+    h1 { color: white; margin-bottom: 30px; font-size: 28px; }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 900px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333333;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #eeeeee;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        outline: none;
+        border-color:#cd6300;
+    }
+
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-item label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: normal;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 15px;
+        background: linear-gradient(135deg,#cd6300 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.15) !important;backdrop-filter: blur(10px);;
+        color: #333333;
+        border: 2px solid #eeeeee;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        border-color:#cd6300;
+        color:#cd6300;
+    }
+</style>
+
+<div class="admin-nav">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <span>Admin - Cantine Scolaire</span>
+    </div>
+    <div>
+        <span style="margin-right: 15px; font-weight: 600;">👤 {{ nom }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Déconnexion</a>
+    </div>
+</div>
+
+<div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+    <a href="{{ url_for('admin_menus') }}"> Menus</a>
+    <a href="{{ url_for('admin_repas') }}" class="active"> Repas</a>
+    <a href="{{ url_for('admin_commandes') }}"> Commandes</a>
+    <a href="{{ url_for('admin_eleves') }}"> Élèves</a>
+    <a href="{{ url_for('admin_stock') }}"> Stock</a>
+    <a href="{{ url_for('admin_paiements') }}"> Paiements</a>
+    <a href="{{ url_for('admin_employees') }}"> Employés</a>
+</div>
+
+<div class="main-content">
+    <h1> Modifier le Repas</h1>
+
+    <div class="form-container">
+        <form method="POST">
+            <div class="form-group">
+                <label for="nom">Nom du Repas *</label>
+                <input type="text" id="nom" name="nom" value="{{ repas.nom_du_repas }}" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="type">Type de Repas *</label>
+                    <select id="type" name="type" required>
+                        <option value="Entrée" {% if repas.type == 'Entrée' %}selected{% endif %}>Entrée</option>
+                        <option value="Plat Principal" {% if repas.type == 'Plat Principal' %}selected{% endif %}>Plat Principal</option>
+                        <option value="Accompagnement" {% if repas.type == 'Accompagnement' %}selected{% endif %}>Accompagnement</option>
+                        <option value="Dessert" {% if repas.type == 'Dessert' %}selected{% endif %}>Dessert</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="prix">Prix (DH) *</label>
+                    <input type="number" id="prix" name="prix" step="0.01" value="{{ repas.prix }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description">{{ repas.description }}</textarea>
+            </div>
+
+            <h3 style="color: #333333; margin: 25px 0 15px 0;"> Informations Nutritionnelles</h3>
+
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label for="calories">Calories (kcal)</label>
+                    <input type="number" id="calories" name="calories" value="{{ repas.calories }}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="glucides">Glucides (g)</label>
+                    <input type="number" id="glucides" name="glucides" step="0.1" value="{{ repas.glucides }}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="lipides">Lipides (g)</label>
+                    <input type="number" id="lipides" name="lipides" step="0.1" value="{{ repas.lipides }}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="proteines">Protéines (g)</label>
+                    <input type="number" id="proteines" name="proteines" step="0.1" value="{{ repas.proteines }}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="fibres">Fibres (g)</label>
+                    <input type="number" id="fibres" name="fibres" step="0.1" value="{{ repas.fibres }}" min="0">
+                </div>
+            </div>
+
+            <h3 style="color: #333333; margin: 25px 0 15px 0;"> Régimes Compatibles</h3>
+
+            {% set regimes_selectionnes = repas.regimes_compatibles.split(',') if repas.regimes_compatibles else [] %}
+
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_veg" name="regimes" value="Végétarien"
+                                {% if 'Végétarien' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_veg">Végétarien</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_vegan" name="regimes" value="Végétalien (Vegan)"
+                                {% if 'Végétalien (Vegan)' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_vegan">Végétalien (Vegan)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_gluten" name="regimes" value="Sans gluten"
+                        {% if 'Sans gluten' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_gluten">Sans gluten</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_lactose" name="regimes" value="Sans lactose"
+                        {% if 'Sans lactose' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_lactose">Sans lactose</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_halal" name="regimes" value="Halal"
+                        {% if 'Halal' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_halal">Halal</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_casher" name="regimes" value="Casher"
+                        {% if 'Casher' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_casher">Casher</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_diab" name="regimes" value="Diabétique"
+                        {% if 'Diabétique' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_diab">Diabétique</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_hyper" name="regimes" value="Hypertendu"
+                        {% if 'Hypertendu' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_hyper">Hypertendu (faible en sel)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_chol" name="regimes" value="Faible en cholestérol"
+                        {% if 'Faible en cholestérol' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_chol">Faible en cholestérol</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_nuts" name="regimes" value="Sans fruits à coque"
+                        {% if 'Sans fruits à coque' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_nuts">Sans fruits à coque</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="regime_pesc" name="regimes" value="Pescétarien (poisson uniquement)"
+                        {% if 'Pescétarien (poisson uniquement)' in regimes_selectionnes %}checked{% endif %}>
+                    <label for="regime_pesc">Pescétarien (poisson uniquement)</label>
+                </div>
+            </div>
+
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="disponible">Disponibilité</label>
+                <select id="disponible" name="disponible">
+                    <option value="1" {% if repas.disponible_cette_semaine == 1 %}selected{% endif %}>Disponible cette semaine</option>
+                    <option value="0" {% if repas.disponible_cette_semaine == 0 %}selected{% endif %}>Non disponible</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('admin_repas') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">✓ Enregistrer les Modifications</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
